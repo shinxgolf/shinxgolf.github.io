@@ -1,0 +1,11 @@
+Name,Company,Department,Title,Phone,Email,Birthday,Hobby,Memo,AssignedTo,LastContactDate,IsActive,Status,Address,Latitude,Longitude
+田中 一郎,株式会社ABC不動産,法人営業部,課長,03-1111-2222,tanaka@abc-re.example.jp,1978-03-15,ゴルフ・野球観戦,子供が少年野球。巨人ファン。,sato@ourcompany.example.jp,2026-03-10,TRUE,通常,東京都千代田区丸の内1-1-1,35.6817,139.7660
+山田 花子,XYZ不動産,オフィス仲介課,主任,03-2222-3333,yamada@xyz-re.example.jp,1985-07-22,ワイン・旅行,フランス赴任経験。ワインの話で盛り上がる。,sato@ourcompany.example.jp,2026-04-07,TRUE,通常,東京都港区赤坂3-2-1,35.6720,139.7360
+鈴木 次郎,DEF仲介,営業部,係長,045-333-4444,suzuki@def.example.jp,1990-11-03,キャンプ・釣り,週末は家族でキャンプ。独立検討中の噂。,suzuki-m@ourcompany.example.jp,2026-05-25,TRUE,通常,神奈川県横浜市中区本町2-5,35.4470,139.6380
+佐々木 健,グローバルプロパティ,法人部,部長,03-4444-5555,sasaki@globalprop.example.jp,1972-01-30,ゴルフ・読書,業界歴25年。紹介の質が高い。,sato@ourcompany.example.jp,2026-02-18,TRUE,通常,東京都中央区日本橋2-3-1,35.6820,139.7740
+井上 美咲,首都圏不動産サービス,仲介事業部,担当,03-5555-6666,inoue@shutoken-re.example.jp,1993-09-12,カフェ巡り・ヨガ,若手で行動力あり。SNS経由案件に強い。,suzuki-m@ourcompany.example.jp,2026-05-30,TRUE,通常,東京都新宿区西新宿1-6-1,35.6900,139.6980
+渡辺 浩,ベイエリアエステート,営業二課,課長代理,045-666-7777,watanabe@bayarea.example.jp,1981-05-18,サッカー観戦,横浜エリアに強い。地元ネットワーク広い。,suzuki-m@ourcompany.example.jp,2026-01-15,TRUE,通常,神奈川県横浜市西区みなとみらい3-1,35.4620,139.6320
+中村 大輔,セントラル不動産,法人営業,主任,03-7777-8888,nakamura@central-re.example.jp,1987-12-08,登山・写真,寡黙だが信頼できる。大型案件実績あり。,sato@ourcompany.example.jp,2026-03-28,TRUE,通常,東京都千代田区大手町1-3-2,35.6870,139.7640
+小林 由紀,みらいオフィスナビ,仲介課,担当,03-8888-9999,kobayashi@miraioffice.example.jp,1995-02-25,映画・料理,前任者の退職で担当が空席。要再割当。,,2026-05-20,TRUE,通常,東京都渋谷区渋谷2-1-1,35.6590,139.7040
+加藤 信一,東京ビルマネジメント,営業部,次長,03-9999-0000,kato@tokyo-bm.example.jp,1975-08-14,日本酒・歴史,別の内装業者へ発注が続いており当面追わない。,,2026-04-22,TRUE,休眠,東京都品川区大崎1-2-2,35.6190,139.7280
+高橋 真理,プレミアオフィス,法人仲介部,課長,03-1010-2020,takahashi@premier-office.example.jp,1983-06-30,テニス・美術館,丁寧な仕事ぶり。富裕層クライアントに強い。,suzuki-m@ourcompany.example.jp,2026-06-01,TRUE,通常,東京都港区六本木6-10-1,35.6605,139.7290

@@ -1,0 +1,8 @@
+SettingKey,SettingValue,Description
+WeeklyReportDay,Tuesday,週次報告の曜日
+WeeklyReportTime,13:00,週次報告の時刻
+WeeklyReportEnabled,true,週次報告のON/OFF
+BrokerAlertDays,60,仲介業者アラート日数
+CustomerAlertYellow,180,既存顧客 黄アラート日数
+CustomerAlertRed,365,既存顧客 赤アラート日数
+ManagerEmails,manager@ourcompany.example.jp,マネジメントモード表示対象（カンマ区切り）

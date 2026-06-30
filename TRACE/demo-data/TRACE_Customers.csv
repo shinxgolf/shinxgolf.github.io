@@ -1,0 +1,11 @@
+CompanyName,ContactName,Phone,Email,Industry,EmployeeCount,OfficeSize,ContractEndDate,FiscalMonth,LastMoveDate,NextFollowDate,LastContactDate,IsHandling,AssignedTo,IsActive,Status,Address,Latitude,Longitude
+株式会社DEF商事,大野 部長,03-1234-5678,oono@def-shoji.example.jp,商社,120,80坪,2026-09-30,3,2023-04-01,2026-06-05,2025-03-10,FALSE,sato@ourcompany.example.jp,TRUE,通常,神奈川県横浜市西区北幸1-4,35.4660,139.6220
+山田製作所,山田 社長,06-2345-6789,yamada@yamada-ss.example.jp,製造,45,30坪,2027-03-31,9,2024-03-01,,2025-11-20,FALSE,suzuki-m@ourcompany.example.jp,TRUE,通常,神奈川県川崎市幸区堀川町580,35.5310,139.6970
+グリーンテック株式会社,西村 総務部長,03-3456-7890,nishimura@greentech.example.jp,IT,210,150坪,2026-12-31,12,2022-10-01,2026-06-01,2026-05-28,FALSE,sato@ourcompany.example.jp,TRUE,通常,東京都渋谷区道玄坂1-10,35.6580,139.6990
+株式会社ブルーオーシャン,田所 取締役,045-4567-8901,tadokoro@blueocean.example.jp,コンサル,68,50坪,2028-06-30,6,2025-07-01,,2026-04-15,TRUE,suzuki-m@ourcompany.example.jp,TRUE,通常,神奈川県横浜市西区みなとみらい2-3,35.4570,139.6310
+明和フーズ株式会社,小川 管理部長,03-5678-9012,ogawa@meiwa-foods.example.jp,食品,340,200坪,2026-07-31,3,2021-08-01,2026-05-20,2024-12-10,FALSE,sato@ourcompany.example.jp,TRUE,通常,東京都品川区東品川2-2-8,35.6090,139.7490
+さくら不動産管理,桜井 専務,03-6789-0123,sakurai@sakura-pm.example.jp,不動産,90,60坪,2027-09-30,3,2023-10-01,2026-06-15,2026-03-05,FALSE,suzuki-m@ourcompany.example.jp,TRUE,通常,東京都新宿区新宿3-1-1,35.6910,139.7050
+株式会社ネクストステージ,本田 CEO,03-7890-1234,honda@nextstage.example.jp,IT,55,40坪,2026-11-30,12,2024-12-01,,2026-05-22,TRUE,sato@ourcompany.example.jp,TRUE,通常,東京都渋谷区神南1-20,35.6640,139.6990
+東和ロジスティクス,木村 部長,048-8901-2345,kimura@towa-log.example.jp,物流,180,120坪,2027-01-31,3,2022-02-01,2026-07-01,2025-12-18,FALSE,suzuki-m@ourcompany.example.jp,TRUE,通常,埼玉県さいたま市大宮区桜木町1-7,35.9060,139.6230
+株式会社みらい教育,藤田 理事,03-9012-3456,fujita@mirai-edu.example.jp,教育,75,55坪,2026-10-31,3,2020-05-01,2026-04-30,2024-06-02,FALSE,,TRUE,通常,東京都文京区本郷3-1-1,35.7080,139.7620
+ハーモニー商会,松田 社長,06-0123-4567,matsuda@harmony.example.jp,卸売,38,25坪,2028-03-31,9,2025-04-01,,2026-06-03,FALSE,,TRUE,対応NG,東京都中央区銀座5-2-1,35.6710,139.7650

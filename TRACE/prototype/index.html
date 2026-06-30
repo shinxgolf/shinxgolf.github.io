@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRACE — Total Relationship & AI Customer Engine</title>
+<style>
+:root{
+  --primary:#0F1923; --surface:#1A2535; --surface2:#212F42;
+  --accent:#00D4FF; --accent-sub:#0099CC;
+  --warning:#FFB800; --danger:#FF4444; --success:#00CC88;
+  --text:#F0F4F8; --text-sub:#8899AA; --divider:#243040;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Inter','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
+  background:radial-gradient(circle at 30% 10%,#16243a 0%,var(--primary) 60%);
+  color:var(--text); min-height:100vh; display:flex; flex-direction:column;
+}
+/* ===== Top bar (mode switch) ===== */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 22px; border-bottom:1px solid var(--divider);
+  position:sticky; top:0; background:rgba(15,25,35,.85); backdrop-filter:blur(10px); z-index:50;
+}
+.brand{font-weight:800; letter-spacing:.28em; font-size:20px}
+.brand .t{color:var(--accent)}
+.brand small{display:block;font-size:9px;letter-spacing:.18em;color:var(--text-sub);font-weight:500;margin-top:2px}
+.modeswitch{display:flex; gap:6px; background:var(--surface); padding:5px; border-radius:30px;border:1px solid var(--divider)}
+.modeswitch button{
+  border:0; background:transparent; color:var(--text-sub); padding:8px 18px;
+  border-radius:30px; font-size:13px; font-weight:600; cursor:pointer; transition:.2s;
+}
+.modeswitch button.active{background:linear-gradient(135deg,var(--accent),var(--accent-sub)); color:#04161d}
+.stage{flex:1; display:flex; align-items:flex-start; justify-content:center; padding:28px 16px}
+
+/* ===== Phone frame (sales mode) ===== */
+.phone{
+  width:390px; max-width:100%; height:800px; max-height:86vh; background:var(--primary);
+  border:10px solid #060c12; border-radius:42px; overflow:hidden; position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(0,212,255,.08);
+  display:flex; flex-direction:column;
+}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:130px;height:24px;background:#060c12;border-radius:0 0 16px 16px;z-index:30}
+.screen{flex:1; overflow-y:auto; padding-bottom:80px}
+.screen::-webkit-scrollbar{width:0}
+.phead{
+  display:flex;align-items:center;justify-content:space-between;padding:34px 18px 12px;
+  position:sticky;top:0;background:linear-gradient(180deg,var(--primary) 70%,transparent);z-index:20;
+}
+.phead .ttl{font-weight:800;letter-spacing:.2em;font-size:16px}
+.phead .ttl .t{color:var(--accent)}
+.phead .back{background:none;border:0;color:var(--text);font-size:20px;cursor:pointer}
+.icons{display:flex;gap:14px;align-items:center;font-size:18px;color:var(--text-sub)}
+.badge-dot{position:relative}
+.badge-dot::after{content:attr(data-n);position:absolute;top:-6px;right:-8px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px}
+
+/* ===== Sales home ===== */
+.cta{
+  margin:6px 16px 20px;display:block;width:calc(100% - 32px);border:0;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent-sub));color:#04161d;
+  font-weight:800;font-size:16px;padding:18px;border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,212,255,.25);transition:.15s;
+}
+.cta:active{transform:scale(.98)}
+.sec-label{font-size:11px;letter-spacing:.12em;color:var(--text-sub);font-weight:600;margin:18px 18px 8px}
+.card{
+  margin:0 16px 10px;background:var(--surface);border:1px solid var(--divider);
+  border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:.15s;position:relative;overflow:hidden;
+}
+.card:active{background:var(--surface2)}
+.card .name{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.card .sub{color:var(--text-sub);font-size:12px;margin-top:3px}
+.card .meta{font-size:12px;margin-top:6px;color:var(--text-sub)}
+.lb-yellow{border-left:4px solid var(--warning)}
+.lb-red{border-left:4px solid var(--danger)}
+.lb-green{border-left:4px solid var(--success)}
+.lb-blue{border-left:4px solid var(--accent)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.dot.y{background:var(--warning)} .dot.r{background:var(--danger)} .dot.g{background:var(--success)}
+.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto}
+.pill.y{background:rgba(255,184,0,.15);color:var(--warning)}
+.pill.r{background:rgba(255,68,68,.15);color:var(--danger)}
+.pill.b{background:rgba(0,212,255,.15);color:var(--accent)}
+
+/* ===== Bottom nav ===== */
+.bnav{
+  position:absolute;bottom:0;left:0;right:0;height:72px;display:flex;
+  background:rgba(20,30,42,.92);backdrop-filter:blur(12px);border-top:1px solid var(--divider);z-index:25;
+}
+.bnav button{flex:1;border:0;background:none;color:var(--text-sub);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:.15s}
+.bnav button .ic{font-size:20px}
+.bnav button.active{color:var(--accent)}
+
+/* ===== Filter tabs ===== */
+.ftabs{display:flex;gap:8px;padding:4px 16px 12px;overflow-x:auto}
+.ftabs button{white-space:nowrap;border:1px solid var(--divider);background:var(--surface);color:var(--text-sub);padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
+.ftabs button.active{background:var(--accent);color:#04161d;border-color:var(--accent)}
+
+/* ===== Detail ===== */
+.profile{display:flex;flex-direction:column;align-items:center;padding:8px 16px 16px;text-align:center}
+.avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent-sub),var(--surface2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px;color:var(--text);border:2px solid rgba(0,212,255,.3)}
+.profile .pname{font-weight:800;font-size:18px;margin-top:10px}
+.profile .pcomp{color:var(--text-sub);font-size:13px;margin-top:2px}
+.actrow{display:flex;gap:8px;padding:0 16px 6px;flex-wrap:wrap}
+.btn{flex:1;min-width:120px;border:1px solid var(--divider);background:var(--surface);color:var(--text);padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+.btn:active{background:var(--surface2)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-sub));color:#04161d;border:0}
+.dtabs{display:flex;border-bottom:1px solid var(--divider);margin:14px 16px 0}
+.dtabs button{flex:1;background:none;border:0;color:var(--text-sub);padding:12px;font-size:13px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent}
+.dtabs button.active{color:var(--accent);border-bottom-color:var(--accent)}
+.kv{display:flex;padding:11px 16px;border-bottom:1px solid var(--divider);font-size:13px}
+.kv .k{width:96px;color:var(--text-sub);flex:none}
+.kv .v{flex:1}
+.timeline{padding:6px 16px}
+.tl{padding:12px 0 12px 18px;border-left:2px solid var(--divider);position:relative}
+.tl::before{content:'';position:absolute;left:-6px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.tl .tlhead{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-sub)}
+.tl .tltype{font-weight:700;color:var(--text)}
+.tl .tlbody{font-size:13px;margin-top:5px;line-height:1.5}
+.tl .ai{font-size:11px;color:var(--accent);margin-top:5px;display:flex;align-items:center;gap:4px}
+
+/* ===== Modal ===== */
+.overlay{position:absolute;inset:0;background:rgba(6,12,18,.7);backdrop-filter:blur(4px);z-index:60;display:none;align-items:flex-end}
+.overlay.show{display:flex}
+.sheet{width:100%;max-height:92%;overflow-y:auto;background:var(--surface);border-radius:24px 24px 0 0;border-top:1px solid var(--divider);padding:18px 18px 28px;animation:slideup .25s ease}
+@keyframes slideup{from{transform:translateY(40px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.sheet h3{display:flex;justify-content:space-between;align-items:center;font-size:16px;margin-bottom:16px}
+.sheet h3 .x{background:none;border:0;color:var(--text-sub);font-size:22px;cursor:pointer}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;letter-spacing:.08em;color:var(--text-sub);font-weight:600;margin-bottom:7px;text-transform:uppercase}
+.field input,.field textarea,.field select{width:100%;background:var(--primary);border:1px solid var(--divider);border-radius:10px;color:var(--text);padding:12px;font-size:14px;font-family:inherit}
+.field textarea{min-height:90px;resize:vertical}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;background:var(--primary);border:1px solid var(--divider);color:var(--text-sub);padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
+.seg button.active{background:var(--accent);color:#04161d;border-color:var(--accent)}
+.types{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.types button{background:var(--primary);border:1px solid var(--divider);color:var(--text-sub);padding:12px 4px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px}
+.types button .ic{font-size:18px}
+.types button.active{background:rgba(0,212,255,.12);border-color:var(--accent);color:var(--accent)}
+.rec{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--primary);border:1px dashed var(--accent-sub);color:var(--accent);padding:14px;border-radius:10px;font-weight:600;cursor:pointer;margin-top:8px}
+
+/* AI proposal */
+.ai-loading{text-align:center;padding:30px 10px}
+.ai-loading .spark{font-size:38px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(.92)}50%{opacity:1;transform:scale(1.05)}}
+.ai-loading .note{font-size:12px;color:var(--text-sub);margin-top:14px}
+.bar{height:5px;background:var(--divider);border-radius:5px;margin:18px auto 0;width:80%;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-sub));animation:fill 2.2s ease forwards}
+@keyframes fill{to{width:100%}}
+.prop{background:var(--primary);border:1px solid var(--divider);border-radius:12px;padding:13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.prop.applied{border-color:var(--success);opacity:.7}
+.prop .pk{font-size:11px;color:var(--accent);font-weight:700}
+.prop .pv{font-size:13px;margin-top:4px}
+.prop .pbtns{display:flex;gap:6px;flex:none}
+.mini{border:1px solid var(--divider);background:var(--surface2);color:var(--text);font-size:11px;padding:6px 11px;border-radius:8px;cursor:pointer;font-weight:600}
+.mini.apply{background:var(--accent);color:#04161d;border:0}
+
+/* toast */
+.toast{position:absolute;top:40px;left:50%;transform:translateX(-50%);background:var(--success);color:#04161d;font-weight:700;font-size:13px;padding:10px 20px;border-radius:30px;z-index:80;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1;top:50px}
+
+/* ===== Management dashboard ===== */
+.dash{width:100%;max-width:1180px;animation:fade .3s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.dashhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.dashhead h2{font-size:18px;font-weight:800}
+.dashhead .period{display:flex;gap:6px}
+.dashhead .period button{background:var(--surface);border:1px solid var(--divider);color:var(--text-sub);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.dashhead .period button.active{background:var(--accent);color:#04161d;border-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:var(--surface);border:1px solid var(--divider);border-radius:var(--radius);padding:18px}
+.kpi .lab{font-size:11px;color:var(--text-sub);letter-spacing:.06em;font-weight:600}
+.kpi .num{font-size:40px;font-weight:800;margin-top:6px;line-height:1}
+.kpi .num.accent{color:var(--accent)} .kpi .num.warn{color:var(--warning)} .kpi .num.dang{color:var(--danger)}
+.kpi .delta{font-size:12px;margin-top:6px}
+.kpi .delta.up{color:var(--success)} .kpi .delta.down{color:var(--danger)}
+.grid2{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:22px}
+.panel{background:var(--surface);border:1px solid var(--divider);border-radius:var(--radius);padding:18px}
+.panel h3{font-size:14px;font-weight:700;margin-bottom:14px}
+.repcards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.rep{background:var(--primary);border:1px solid var(--divider);border-radius:12px;padding:14px}
+.rep .rname{font-weight:700;display:flex;align-items:center;gap:8px;font-size:14px}
+.rep .rrow{display:flex;justify-content:space-between;font-size:12px;color:var(--text-sub);margin-top:8px}
+.rep .rrow b{color:var(--text);font-weight:700}
+.rep .recent{font-size:11px;color:var(--text-sub);margin-top:8px;border-top:1px solid var(--divider);padding-top:8px}
+.rank{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--divider);font-size:13px}
+.rank .no{width:22px;height:22px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none}
+.rank .no.gold{background:var(--warning);color:#04161d} .rank .no.silver{background:#aab;color:#04161d} .rank .no.bronze{background:#c87;color:#04161d}
+.rank .rc{flex:1}
+.rank .rv{font-weight:700;color:var(--accent)}
+.bars{display:flex;align-items:flex-end;gap:14px;height:160px;padding-top:10px}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;justify-content:flex-end;height:100%}
+.bars .b .bar2{width:60%;background:linear-gradient(180deg,var(--accent),var(--accent-sub));border-radius:6px 6px 0 0;transition:.4s}
+.bars .b .bl{font-size:11px;color:var(--text-sub)}
+.note-box{background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:14px;font-size:12px;color:var(--text-sub);line-height:1.7;margin-top:8px}
+.note-box b{color:var(--accent)}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.repcards{grid-template-columns:1fr}}
+.hint{position:fixed;bottom:14px;right:14px;background:var(--surface);border:1px solid var(--divider);color:var(--text-sub);font-size:11px;padding:8px 12px;border-radius:10px;max-width:240px;line-height:1.5;z-index:90}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="t">T</span>RACE<small>TOTAL RELATIONSHIP & AI CUSTOMER ENGINE</small></div>
+  <div class="modeswitch">
+    <button id="m-sales" class="active" onclick="setMode('sales')">営業モード</button>
+    <button id="m-mng" onclick="setMode('mng')">マネジメント</button>
+  </div>
+</div>
+
+<div class="stage" id="stage"></div>
+<div class="hint">これは Power Apps の見た目・動作を再現したデモ用プロトタイプです（HTML/CSS/JS）。実データではありません。</div>
+
+<script>
+/* ===================== DATA (demoデータと一致) ===================== */
+const TODAY = new Date('2026-06-07T09:00:00');
+const SETTINGS = {brokerYellow:60, custYellow:180, custRed:365};
+
+const brokers = [
+ {id:1,name:'田中 一郎',comp:'株式会社ABC不動産',dept:'法人営業部',title:'課長',phone:'03-1111-2222',email:'tanaka@abc-re.example.jp',bday:'3月15日',hobby:'ゴルフ・野球観戦',memo:'子供が少年野球。巨人ファン。',assignee:'佐藤',last:'2026-03-10',refs:2,status:'通常',addr:'千代田区丸の内',lat:35.6817,lng:139.7660},
+ {id:2,name:'山田 花子',comp:'XYZ不動産',dept:'オフィス仲介課',title:'主任',phone:'03-2222-3333',email:'yamada@xyz-re.example.jp',bday:'7月22日',hobby:'ワイン・旅行',memo:'フランス赴任経験。ワインの話で盛り上がる。',assignee:'佐藤',last:'2026-04-07',refs:1,status:'通常',addr:'港区赤坂',lat:35.6720,lng:139.7360},
+ {id:3,name:'鈴木 次郎',comp:'DEF仲介',dept:'営業部',title:'係長',phone:'045-333-4444',email:'suzuki@def.example.jp',bday:'11月3日',hobby:'キャンプ・釣り',memo:'週末は家族でキャンプ。独立検討中の噂。',assignee:'鈴木M',last:'2026-05-25',refs:0,status:'通常',addr:'横浜市中区',lat:35.4470,lng:139.6380},
+ {id:4,name:'佐々木 健',comp:'グローバルプロパティ',dept:'法人部',title:'部長',phone:'03-4444-5555',email:'sasaki@globalprop.example.jp',bday:'1月30日',hobby:'ゴルフ・読書',memo:'業界歴25年。紹介の質が高い。',assignee:'佐藤',last:'2026-02-18',refs:2,status:'通常',addr:'中央区日本橋',lat:35.6820,lng:139.7740},
+ {id:5,name:'井上 美咲',comp:'首都圏不動産サービス',dept:'仲介事業部',title:'担当',phone:'03-5555-6666',email:'inoue@shutoken-re.example.jp',bday:'9月12日',hobby:'カフェ巡り・ヨガ',memo:'若手で行動力あり。SNS経由案件に強い。',assignee:'鈴木M',last:'2026-05-30',refs:1,status:'通常',addr:'新宿区西新宿',lat:35.6900,lng:139.6980},
+ {id:6,name:'渡辺 浩',comp:'ベイエリアエステート',dept:'営業二課',title:'課長代理',phone:'045-666-7777',email:'watanabe@bayarea.example.jp',bday:'5月18日',hobby:'サッカー観戦',memo:'横浜エリアに強い。地元ネットワーク広い。',assignee:'鈴木M',last:'2026-01-15',refs:0,status:'通常',addr:'横浜市西区MM',lat:35.4620,lng:139.6320},
+ {id:7,name:'中村 大輔',comp:'セントラル不動産',dept:'法人営業',title:'主任',phone:'03-7777-8888',email:'nakamura@central-re.example.jp',bday:'12月8日',hobby:'登山・写真',memo:'寡黙だが信頼できる。大型案件実績あり。',assignee:'佐藤',last:'2026-03-28',refs:1,status:'通常',addr:'千代田区大手町',lat:35.6870,lng:139.7640},
+ {id:8,name:'小林 由紀',comp:'みらいオフィスナビ',dept:'仲介課',title:'担当',phone:'03-8888-9999',email:'kobayashi@miraioffice.example.jp',bday:'2月25日',hobby:'映画・料理',memo:'前任者の退職で担当が空席。要再割当。',assignee:'',last:'2026-05-20',refs:0,status:'通常',addr:'渋谷区渋谷',lat:35.6590,lng:139.7040},
+ {id:9,name:'加藤 信一',comp:'東京ビルマネジメント',dept:'営業部',title:'次長',phone:'03-9999-0000',email:'kato@tokyo-bm.example.jp',bday:'8月14日',hobby:'日本酒・歴史',memo:'別の内装業者へ発注が続いており当面追わない。',assignee:'',last:'2026-04-22',refs:1,status:'休眠',addr:'品川区大崎',lat:35.6190,lng:139.7280},
+ {id:10,name:'高橋 真理',comp:'プレミアオフィス',dept:'法人仲介部',title:'課長',phone:'03-1010-2020',email:'takahashi@premier-office.example.jp',bday:'6月30日',hobby:'テニス・美術館',memo:'丁寧な仕事ぶり。富裕層クライアントに強い。',assignee:'鈴木M',last:'2026-06-01',refs:0,status:'通常',addr:'港区六本木',lat:35.6605,lng:139.7290},
+];
+const customers = [
+ {id:1,comp:'株式会社DEF商事',contact:'大野 部長',phone:'03-1234-5678',industry:'商社',emp:120,size:'80坪',contractEnd:'2026-09-30',fiscal:3,lastMove:'2023-04-01',nextFollow:'2026-06-05',last:'2025-03-10',handling:false,assignee:'佐藤',status:'通常',addr:'横浜市西区北幸',lat:35.4660,lng:139.6220},
+ {id:2,comp:'山田製作所',contact:'山田 社長',phone:'06-2345-6789',industry:'製造',emp:45,size:'30坪',contractEnd:'2027-03-31',fiscal:9,lastMove:'2024-03-01',nextFollow:'',last:'2025-11-20',handling:false,assignee:'鈴木M',status:'通常',addr:'川崎市幸区',lat:35.5310,lng:139.6970},
+ {id:3,comp:'グリーンテック株式会社',contact:'西村 総務部長',phone:'03-3456-7890',industry:'IT',emp:210,size:'150坪',contractEnd:'2026-12-31',fiscal:12,lastMove:'2022-10-01',nextFollow:'2026-06-01',last:'2026-05-28',handling:false,assignee:'佐藤',status:'通常',addr:'渋谷区道玄坂',lat:35.6580,lng:139.6990},
+ {id:4,comp:'株式会社ブルーオーシャン',contact:'田所 取締役',phone:'045-4567-8901',industry:'コンサル',emp:68,size:'50坪',contractEnd:'2028-06-30',fiscal:6,lastMove:'2025-07-01',nextFollow:'',last:'2026-04-15',handling:true,assignee:'鈴木M',status:'通常',addr:'横浜市西区MM',lat:35.4570,lng:139.6310},
+ {id:5,comp:'明和フーズ株式会社',contact:'小川 管理部長',phone:'03-5678-9012',industry:'食品',emp:340,size:'200坪',contractEnd:'2026-07-31',fiscal:3,lastMove:'2021-08-01',nextFollow:'2026-05-20',last:'2024-12-10',handling:false,assignee:'佐藤',status:'通常',addr:'品川区東品川',lat:35.6090,lng:139.7490},
+ {id:6,comp:'さくら不動産管理',contact:'桜井 専務',phone:'03-6789-0123',industry:'不動産',emp:90,size:'60坪',contractEnd:'2027-09-30',fiscal:3,lastMove:'2023-10-01',nextFollow:'2026-06-15',last:'2026-03-05',handling:false,assignee:'鈴木M',status:'通常',addr:'新宿区新宿',lat:35.6910,lng:139.7050},
+ {id:7,comp:'株式会社ネクストステージ',contact:'本田 CEO',phone:'03-7890-1234',industry:'IT',emp:55,size:'40坪',contractEnd:'2026-11-30',fiscal:12,lastMove:'2024-12-01',nextFollow:'',last:'2026-05-22',handling:true,assignee:'佐藤',status:'通常',addr:'渋谷区神南',lat:35.6640,lng:139.6990},
+ {id:8,comp:'東和ロジスティクス',contact:'木村 部長',phone:'048-8901-2345',industry:'物流',emp:180,size:'120坪',contractEnd:'2027-01-31',fiscal:3,lastMove:'2022-02-01',nextFollow:'2026-07-01',last:'2025-12-18',handling:false,assignee:'鈴木M',status:'通常',addr:'さいたま市大宮区',lat:35.9060,lng:139.6230},
+ {id:9,comp:'株式会社みらい教育',contact:'藤田 理事',phone:'03-9012-3456',industry:'教育',emp:75,size:'55坪',contractEnd:'2026-10-31',fiscal:3,lastMove:'2020-05-01',nextFollow:'2026-04-30',last:'2024-06-02',handling:false,assignee:'',status:'通常',addr:'文京区本郷',lat:35.7080,lng:139.7620},
+ {id:10,comp:'ハーモニー商会',contact:'松田 社長',phone:'06-0123-4567',industry:'卸売',emp:38,size:'25坪',contractEnd:'2028-03-31',fiscal:9,lastMove:'2025-04-01',nextFollow:'',last:'2026-06-03',handling:false,assignee:'',status:'対応NG',addr:'中央区銀座',lat:35.6710,lng:139.7650},
+];
+// 現在地（デモ用：渋谷駅付近）。「近くの相手」はこの地点からの距離で算出
+const MYLOC = {lat:35.6580, lng:139.7016, label:'現在地（渋谷駅付近）'};
+function distKm(a,b){const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
+  const s=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));}
+const cases = [
+ {cust:'株式会社DEF商事',broker:'田中 一郎',date:'2025-06-10',won:true,amount:24000000,desc:'横浜支店移転プロジェクト'},
+ {cust:'グリーンテック株式会社',broker:'佐々木 健',date:'2025-09-05',won:true,amount:38000000,desc:'本社オフィス拡張移転'},
+ {cust:'株式会社ブルーオーシャン',broker:'山田 花子',date:'2026-01-20',won:true,amount:15000000,desc:'みなとみらい新オフィス'},
+ {cust:'明和フーズ株式会社',broker:'佐々木 健',date:'2024-11-15',won:true,amount:42000000,desc:'物流拠点併設オフィス移転'},
+ {cust:'株式会社ネクストステージ',broker:'井上 美咲',date:'2025-12-01',won:true,amount:12000000,desc:'渋谷スタートアップ拠点'},
+ {cust:'東和ロジスティクス',broker:'中村 大輔',date:'2025-03-12',won:false,amount:0,desc:'大宮エリア移転（他社決定）'},
+ {cust:'株式会社みらい教育',broker:'加藤 信一',date:'2024-05-20',won:true,amount:18000000,desc:'研修センター移転'},
+ {cust:'さくら不動産管理',broker:'田中 一郎',date:'2026-02-08',won:false,amount:0,desc:'都内移転検討（保留中）'},
+];
+const visits = {
+ b1:[{date:'2026-03-10',type:'訪問アポ',body:'横浜支店移転の件で挨拶。息子さんが少年野球で準優勝と嬉しそう。次の大型案件は秋頃。',ai:'横浜移転FUP。私的話題で関係良好。秋に大型案件見込み。'}],
+ b2:[{date:'2026-04-07',type:'訪問アポ',body:'ワイン差し入れ。ブルーオーシャン社成約。次はIT系スタートアップ紹介を検討中。',ai:'成約お礼訪問。次はIT系案件を検討中。'}],
+ b4:[{date:'2026-02-18',type:'訪問アポ',body:'明和フーズ案件の振り返り。業界トレンド情報。経営書を薦められた。',ai:'案件振り返り。業界情報入手。良好な関係。'}],
+ b6:[{date:'2026-01-15',type:'電話',body:'年始挨拶。横浜エリアで新規引き合いの可能性。詳細は後日。',ai:'年始挨拶。横浜で新規引き合いの可能性。要FUP。'}],
+ c1:[{date:'2025-03-10',type:'訪問アポ',body:'移転完了後の状況確認。新オフィス満足。3月決算で予算は4月以降。レイアウト微調整の相談。',ai:'移転後FUP。満足。予算は4月以降。レイアウト相談あり。'}],
+ c5:[{date:'2024-12-10',type:'訪問アポ',body:'移転1年後の確認。増員で手狭になりつつあり、次回移転の可能性。決算は3月。',ai:'1年後FUP。増員で手狭、次回移転の可能性。要継続FUP。'}],
+ c9:[{date:'2024-06-02',type:'電話',body:'移転後の挨拶。問題なしだが以降フォローが途絶えている。',ai:'移転後挨拶。以降FUP途絶。'}],
+ c3:[{date:'2026-05-28',type:'訪問ついで',body:'近くまで来たので立ち寄り。事業好調で来期増員予定。オフィス拡張再燃の可能性。',ai:'立ち寄り。増員予定、拡張再検討の可能性。'}],
+ c8:[{date:'2025-12-18',type:'メモ',body:'木村部長からメールで「来年の組織改編でフロア再編があるかも」と連絡。重要。',ai:'メールにて組織改編によるフロア再編の可能性。要追跡。'}],
+};
+
+/* ===================== HELPERS ===================== */
+const daysSince = d => Math.floor((TODAY - new Date(d))/86400000);
+function brokerAlert(b){const d=daysSince(b.last);if(d>=SETTINGS.brokerYellow)return{lv:'y',d};return{lv:'g',d};}
+function custAlert(c){const d=daysSince(c.last);if(c.handling)return{lv:'h',d};if(d>=SETTINGS.custRed)return{lv:'r',d};if(d>=SETTINGS.custYellow)return{lv:'y',d};return{lv:'g',d};}
+const initials = n => n.replace(/\s/g,'').slice(0,1);
+const yen = n => '¥'+(n/10000).toLocaleString()+'万';
+const fmtDays = d => d>=365?`${Math.floor(d/30)}ヶ月`:`${d}日`;
+const isLive = x => x.status==='通常';                 // 一覧/アラート対象（休眠・対応NG除外）
+const isUnassigned = x => x.status==='通常' && !x.assignee; // 未割当（担当空欄）
+const liveBrokers  = () => brokers.filter(isLive);
+const liveCusts    = () => customers.filter(isLive);
+const asg = x => x.assignee || '未割当';
+
+/* ===================== STATE ===================== */
+let mode='sales', tab='home', detail=null, listFilter='all', searchFilter='all', recStep=0, recType='', recTarget='';
+
+/* ===================== RENDER ===================== */
+function setMode(m){mode=m;document.getElementById('m-sales').classList.toggle('active',m==='sales');document.getElementById('m-mng').classList.toggle('active',m==='mng');render();}
+function go(t){tab=t;detail=null;render();}
+function openDetail(kind,id){detail={kind,id,dtab:kind==='broker'?'prof':'prof'};render();}
+
+function render(){
+  const stage=document.getElementById('stage');
+  if(mode==='mng'){stage.innerHTML=dashboard();return;}
+  let body;
+  if(detail) body=detailScreen();
+  else if(tab==='home') body=homeScreen();
+  else if(tab==='brokers') body=brokerList();
+  else if(tab==='customers') body=customerList();
+  else if(tab==='search') body=searchScreen();
+  else if(tab==='near') body=nearScreen();
+  else if(tab==='pool') body=poolScreen();
+  stage.innerHTML=`<div class="phone"><div class="notch"></div>
+    <div id="toast" class="toast">保存しました</div>
+    <div class="screen">${body}</div>
+    ${bottomNav()}
+    <div class="overlay" id="ovl"><div class="sheet" id="sheet"></div></div>
+  </div>`;
+}
+
+function bottomNav(){
+  const items=[['home','🏠','ホーム'],['brokers','👤','仲介'],['customers','🏢','顧客'],['search','🔍','検索']];
+  return `<div class="bnav">${items.map(([k,i,l])=>
+   `<button class="${tab===k&&!detail?'active':''}" onclick="go('${k}')"><span class="ic">${i}</span>${l}</button>`).join('')}</div>`;
+}
+
+/* ---------- HOME ---------- */
+function homeScreen(){
+  const today = customers.filter(c=>!c.handling && c.nextFollow && new Date(c.nextFollow)<=TODAY)
+    .map(c=>`<div class="card lb-blue" onclick="openDetail('customer',${c.id})">
+       <div class="name">🗓 ${c.contact} <span class="pill b">本日</span></div>
+       <div class="sub">${c.comp}</div>
+       <div class="meta">フォロー予定日：${c.nextFollow}</div></div>`).join('')||`<div class="card">本日のフォロー予定はありません</div>`;
+
+  const ba=liveBrokers().map(b=>({b,a:brokerAlert(b)})).filter(x=>x.a.lv!=='g');
+  const ca=liveCusts().map(c=>({c,a:custAlert(c)})).filter(x=>x.a.lv==='y'||x.a.lv==='r');
+  const uaPill = x => isUnassigned(x)?'<span class="pill" style="background:rgba(255,68,68,.18);color:var(--danger)">担当者なし</span>':'';
+  const alerts=[
+    ...ca.sort((x,y)=>y.a.d-x.a.d).map(x=>`<div class="card lb-${x.a.lv==='r'?'red':'yellow'}" onclick="openDetail('customer',${x.c.id})">
+       <div class="name"><span class="dot ${x.a.lv}"></span>${x.c.comp}<span class="pill ${x.a.lv}">${x.a.lv==='r'?'赤':'黄'}</span></div>
+       <div class="sub">既存顧客・${x.c.industry} / 担当:${asg(x.c)} ${uaPill(x.c)}</div>
+       <div class="meta">${fmtDays(x.a.d)}未接触</div></div>`),
+    ...ba.sort((x,y)=>y.a.d-x.a.d).map(x=>`<div class="card lb-yellow" onclick="openDetail('broker',${x.b.id})">
+       <div class="name"><span class="dot y"></span>${x.b.name}<span class="pill y">黄</span></div>
+       <div class="sub">${x.b.comp} / 担当:${asg(x.b)} ${uaPill(x.b)}</div>
+       <div class="meta">${x.a.d}日未接触</div></div>`)
+  ].join('');
+
+  return `<div class="phead"><div class="ttl"><span class="t">T</span>RACE</div>
+     <div class="icons"><span class="badge-dot" data-n="${ba.length+ca.length}">🔔</span><span>👤</span></div></div>
+   <button class="cta" onclick="openRecord()">＋ 訪問を記録する</button>
+   <div style="display:flex;gap:8px;margin:0 16px 4px">
+     <button class="btn" onclick="go('near')">📍 近くの相手</button>
+     <button class="btn" onclick="go('pool')">🙌 未割当を引き取る</button>
+   </div>
+   <div class="sec-label">TODAY — 本日のフォロー</div>${today}
+   <div class="sec-label">ALERT — 放置されている相手</div>${alerts}`;
+}
+
+/* ---------- BROKER LIST ---------- */
+function brokerList(){
+  let list=liveBrokers().map(b=>({b,a:brokerAlert(b)})); // 休眠・対応NGは除外
+  if(listFilter==='need') list=list.filter(x=>x.a.lv==='y');
+  if(listFilter==='recent') list=list.sort((x,y)=>x.a.d-y.a.d);
+  else list=list.sort((x,y)=>y.a.d-x.a.d);
+  const ua = b => isUnassigned(b)?' <span class="pill" style="background:rgba(255,68,68,.18);color:var(--danger)">担当者なし</span>':'';
+  const rows=list.map(({b,a})=>`<div class="card lb-${a.lv==='y'?'yellow':'green'}" onclick="openDetail('broker',${b.id})">
+     <div class="name"><span class="dot ${a.lv}"></span>${b.name}${ua(b)}</div>
+     <div class="sub">${b.comp} / 担当:${asg(b)}</div>
+     <div class="meta">${a.d}日未接触 · 紹介${b.refs}件</div></div>`).join('');
+  const hidden=brokers.length-list.length;
+  return `<div class="phead"><button class="back" onclick="go('home')">‹</button>
+     <div class="ttl">仲介業者</div><div class="icons"><span>🔍</span><span>＋</span></div></div>
+   <div class="ftabs">
+     <button class="${listFilter==='all'?'active':''}" onclick="setLF('all')">全員</button>
+     <button class="${listFilter==='need'?'active':''}" onclick="setLF('need')">要フォロー</button>
+     <button class="${listFilter==='recent'?'active':''}" onclick="setLF('recent')">最近順</button>
+   </div>${rows}
+   <div class="sec-label">休眠・対応NG（${hidden}件）は一覧から除外中</div>`;
+}
+function setLF(f){listFilter=f;render();}
+
+/* ---------- CUSTOMER LIST ---------- */
+function customerList(){
+  let list=liveCusts().map(c=>({c,a:custAlert(c)})).filter(x=>x.a.lv!=='h'); // 案件対応中・休眠・対応NGは除外
+  list.sort((x,y)=>({r:2,y:1,g:0}[y.a.lv])-({r:2,y:1,g:0}[x.a.lv]) || y.a.d-x.a.d);
+  const ua = c => isUnassigned(c)?' <span class="pill" style="background:rgba(255,68,68,.18);color:var(--danger)">担当者なし</span>':'';
+  const rows=list.map(({c,a})=>`<div class="card lb-${a.lv==='r'?'red':a.lv==='y'?'yellow':'green'}" onclick="openDetail('customer',${c.id})">
+     <div class="name"><span class="dot ${a.lv}"></span>${c.comp}${ua(c)}</div>
+     <div class="sub">${c.industry} · ${c.emp}名 · 担当:${asg(c)}</div>
+     <div class="meta">${fmtDays(a.d)}未接触 · 決算${c.fiscal}月</div></div>`).join('');
+  const handling=customers.filter(c=>c.handling&&isLive(c)).length;
+  const dormant=customers.filter(c=>!isLive(c)).length;
+  return `<div class="phead"><button class="back" onclick="go('home')">‹</button>
+     <div class="ttl">既存顧客</div><div class="icons"><span>🔍</span><span>＋</span></div></div>
+   <div class="ftabs"><button class="active">アラート順</button><button>担当別</button></div>
+   ${rows}
+   <div class="sec-label">案件対応中 ${handling}件・休眠/対応NG ${dormant}件 は一覧から除外中</div>`;
+}
+
+/* ---------- SEARCH ---------- */
+function statusBadge(x){
+  if(x.status==='対応NG') return ' <span class="pill r">⚠️対応NG</span>';
+  if(x.status==='休眠') return ' <span class="pill" style="background:var(--surface2);color:var(--text-sub)">休眠</span>';
+  if(isUnassigned(x)) return ' <span class="pill" style="background:rgba(255,68,68,.18);color:var(--danger)">担当者なし</span>';
+  return '';
+}
+function searchScreen(){
+  let res=[];
+  if(searchFilter!=='customer') res.push(...brokers.map(b=>`<div class="card" onclick="openDetail('broker',${b.id})"><div class="name">👤 ${b.name}${statusBadge(b)}</div><div class="sub">${b.comp}</div></div>`));
+  if(searchFilter!=='broker') res.push(...customers.map(c=>`<div class="card" onclick="openDetail('customer',${c.id})"><div class="name">🏢 ${c.comp}${statusBadge(c)}</div><div class="sub">${c.industry} · ${c.contact}</div></div>`));
+  return `<div class="phead"><div class="ttl">検索</div></div>
+   <div class="field" style="padding:0 16px"><input placeholder="🔍 名前・会社名で検索"></div>
+   <div class="ftabs">
+     <button class="${searchFilter==='all'?'active':''}" onclick="setSF('all')">全員</button>
+     <button class="${searchFilter==='broker'?'active':''}" onclick="setSF('broker')">仲介業者</button>
+     <button class="${searchFilter==='customer'?'active':''}" onclick="setSF('customer')">既存顧客</button>
+   </div>${res.join('')}`;
+}
+function setSF(f){searchFilter=f;render();}
+
+/* ---------- 近くの相手（ついで訪問） ---------- */
+function nearScreen(){
+  const items=[
+    ...liveBrokers().map(b=>({kind:'broker',o:b,a:brokerAlert(b),dist:distKm(MYLOC,b)})),
+    ...liveCusts().map(c=>({kind:'customer',o:c,a:custAlert(c),dist:distKm(MYLOC,c)}))
+  ].filter(x=>x.a.lv!=='h').sort((x,y)=>x.dist-y.dist).slice(0,8);
+  const rows=items.map(x=>{
+    const warn=x.a.lv==='r'||x.a.lv==='y';
+    const lb=x.a.lv==='r'?'lb-red':x.a.lv==='y'?'lb-yellow':'lb-green';
+    const name=x.kind==='broker'?x.o.name:x.o.comp;
+    const ua=isUnassigned(x.o)?' <span class="pill" style="background:rgba(255,68,68,.18);color:var(--danger)">担当者なし</span>':'';
+    return `<div class="card ${lb}" onclick="openDetail('${x.kind}',${x.o.id})">
+      <div class="name">${x.kind==='broker'?'👤':'🏢'} ${name}${ua}
+        <span class="pill b">${x.dist.toFixed(1)}km</span></div>
+      <div class="sub">${x.o.addr} / 担当:${asg(x.o)}</div>
+      <div class="meta">${warn?(x.a.lv==='r'?'🔴':'🟡')+' '+fmtDays(x.a.d)+'未接触 — 寄って損なし':'最近接触済み'}</div></div>`;
+  }).join('');
+  return `<div class="phead"><button class="back" onclick="go('home')">‹</button><div class="ttl">近くの相手</div><div class="icons"><span>🗺</span></div></div>
+   <div class="card lb-blue" style="margin-bottom:6px"><div class="name">📍 ${MYLOC.label}</div>
+     <div class="sub">打ち合わせが早く終わった時に、近い順で要フォローの相手を提案します</div></div>
+   <div class="sec-label">近い順（要フォローを優先表示）</div>${rows}
+   <div class="sec-label">※ 第2段階：今日のアポ先・道中ベース／前日ルート計画は Kintone連携後</div>`;
+}
+
+/* ---------- 未割当プール（手挙げ引き取り） ---------- */
+function poolScreen(){
+  const pool=[
+    ...brokers.filter(isUnassigned).map(b=>({kind:'broker',o:b,a:brokerAlert(b)})),
+    ...customers.filter(isUnassigned).map(c=>({kind:'customer',o:c,a:custAlert(c)}))
+  ];
+  const rows=pool.length?pool.map(x=>{
+    const name=x.kind==='broker'?x.o.name:x.o.comp;
+    const sug=x.kind==='broker'?'前回接触者':'エリア担当';
+    return `<div class="card lb-red"><div class="name">${x.kind==='broker'?'👤':'🏢'} ${name}</div>
+      <div class="sub">${x.o.comp||x.o.industry} / ${x.o.addr}</div>
+      <div class="meta">${fmtDays(x.a.d)}未接触 · AI提案:${sug}から「佐藤」が適任</div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="mini apply" onclick="claim('${x.kind}',${x.o.id})">自分が引き取る</button>
+        <button class="mini" onclick="dormant('${x.kind}',${x.o.id})">休眠にする</button>
+      </div></div>`;
+  }).join(''):'<div class="card">未割当の相手はいません 🎉</div>';
+  return `<div class="phead"><button class="back" onclick="go('home')">‹</button><div class="ttl">未割当プール</div><div class="icons"><span>🙌</span></div></div>
+   <div class="card lb-blue" style="margin-bottom:6px"><div class="name">🙌 今なら取れる相手</div>
+     <div class="sub">退職等で担当が空いた相手。早い者勝ちで引き取れます（数字を上げるチャンス）</div></div>
+   <div class="sec-label">引き取り待ち ${pool.length}件</div>${rows}`;
+}
+function dormant(kind,id){const arr=kind==='broker'?brokers:customers;const x=arr.find(o=>o.id===id);
+  x.status='休眠';toast('休眠にしました（情報は保持）');render();}
+
+/* ---------- DETAIL ---------- */
+function detailScreen(){
+  if(detail.kind==='broker'){
+    const b=brokers.find(x=>x.id===detail.id), a=brokerAlert(b);
+    const myCases=cases.filter(c=>c.broker===b.name);
+    const vlog=visits['b'+b.id]||[];
+    return detailShell(b,b.name,b.comp,`${b.dept} / ${b.title}`,a,
+     dtabs(['prof','案件','履歴']),
+     detail.dtab==='prof'?
+       assignRow(b)+kv('誕生日',b.bday)+kv('趣味',b.hobby)+kv('メモ',b.memo)+kv('連絡先',b.phone):
+     detail.dtab==='案件'?
+       (myCases.length?myCases.map(c=>`<div class="card"><div class="name">${c.desc} ${c.won?'<span class="pill" style="background:rgba(0,204,136,.15);color:var(--success)">✅成約</span>':'<span class="pill y">検討</span>'}</div><div class="meta">${c.date} ${c.won?'/ '+yen(c.amount):''}</div></div>`).join(''):'<div class="card">紹介案件はありません</div>'):
+       timeline(vlog),'broker');
+  } else {
+    const c=customers.find(x=>x.id===detail.id), a=custAlert(c);
+    const vlog=visits['c'+c.id]||[];
+    return detailShell(c,c.comp,c.contact,`${c.industry} · ${c.emp}名 · ${c.size}`,a,
+     dtabs(['prof','案件','履歴']),
+     detail.dtab==='prof'?
+       assignRow(c)+kv('担当者',c.contact)+kv('決算月',c.fiscal+'月')+kv('契約満了',c.contractEnd)+kv('前回移転',c.lastMove)+kv('次回FUP',c.nextFollow||'未設定')+(c.handling?'<div class="kv"><div class="k">状態</div><div class="v"><span class="pill b">案件対応中（Kintone）</span></div></div>':''):
+     detail.dtab==='案件'?
+       (cases.filter(x=>x.cust===c.comp).map(x=>`<div class="card"><div class="name">${x.desc} ${x.won?'<span class="pill" style="background:rgba(0,204,136,.15);color:var(--success)">✅成約</span>':'<span class="pill y">検討</span>'}</div><div class="meta">${x.date} 紹介:${x.broker} ${x.won?'/ '+yen(x.amount):''}</div></div>`).join('')||'<div class="card">案件はありません</div>'):
+       timeline(vlog),'customer');
+  }
+}
+// 担当者行（変更／未割当なら引き取り）
+function assignRow(x){
+  const kind=detail.kind;
+  if(isUnassigned(x)) return `<div class="kv"><div class="k">担当営業</div><div class="v"><span class="pill" style="background:rgba(255,68,68,.18);color:var(--danger)">担当者なし</span> <button class="mini apply" onclick="claim('${kind}',${x.id})">自分が引き取る</button></div></div>`;
+  return `<div class="kv"><div class="k">担当営業</div><div class="v">${x.assignee} <button class="mini" onclick="reassign('${kind}',${x.id})">変更</button></div></div>`;
+}
+function detailShell(x,name,comp,sub,a,tabsHtml,body,kind){
+  const ng=x.status==='対応NG', dorm=x.status==='休眠';
+  const badge=ng?'<span class="pill r">⚠️ 対応NG</span>':dorm?'<span class="pill" style="background:var(--surface2);color:var(--text-sub)">休眠</span>':a.lv==='g'?'<span class="pill" style="background:rgba(0,204,136,.15);color:var(--success)">正常</span>':a.lv==='h'?'<span class="pill b">案件対応中</span>':`<span class="pill ${a.lv}">${a.lv==='r'?'赤':'黄'} ${fmtDays(a.d)}未接触</span>`;
+  const ngWarn=ng?`<div class="card lb-red" style="margin-top:8px"><div class="name" style="color:var(--danger)">⚠️ 対応NG（接触禁止）</div><div class="sub">クレーム対応により訪問・連絡は禁止です。記録・割当はできません。</div></div>`:'';
+  const acts=ng?
+    `<div class="actrow"><button class="btn" style="opacity:.4" disabled>📧 メール（NG）</button><button class="btn" style="opacity:.4" disabled>＋ 訪問記録（NG）</button></div>`:
+    `<div class="actrow"><button class="btn primary" onclick="alertMail()">📧 メール下書き作成</button></div>
+     <div class="actrow"><button class="btn">📞 電話</button><button class="btn" onclick="openRecord()">＋ 訪問記録</button></div>`;
+  return `<div class="phead"><button class="back" onclick="go('${kind==='broker'?'brokers':'customers'}')">‹</button><div class="ttl"></div><div class="icons"><span>⋮</span></div></div>
+   <div class="profile"><div class="avatar">${initials(name)}</div>
+     <div class="pname">${name}</div><div class="pcomp">${comp}</div>
+     <div class="pcomp">${sub}</div><div style="margin-top:8px">${badge}</div></div>
+   ${ngWarn}${acts}
+   ${tabsHtml}${body}`;
+}
+// 担当者の変更（デモ：佐藤⇄鈴木Mをトグル）
+function reassign(kind,id){const arr=kind==='broker'?brokers:customers;const x=arr.find(o=>o.id===id);
+  x.assignee = x.assignee==='佐藤'?'鈴木M':'佐藤';toast('担当を '+x.assignee+' に変更しました');render();}
+// 未割当の引き取り（デモ：自分＝佐藤）
+function claim(kind,id){const arr=kind==='broker'?brokers:customers;const x=arr.find(o=>o.id===id);
+  x.assignee='佐藤';toast('あなたの担当になりました 🙌');render();}
+function dtabs(arr){const labels={prof:'プロフ',案件:'案件',履歴:'履歴'};return `<div class="dtabs">${arr.map(t=>`<button class="${detail.dtab===t?'active':''}" onclick="setDT('${t}')">${labels[t]}</button>`).join('')}</div>`;}
+function setDT(t){detail.dtab=t;render();}
+function kv(k,v){return `<div class="kv"><div class="k">${k}</div><div class="v">${v}</div></div>`;}
+function timeline(v){return `<div class="timeline">${v.length?v.map(x=>`<div class="tl"><div class="tlhead"><span class="tltype">${x.type}</span> · ${x.date} <span style="margin-left:auto">⋮</span></div><div class="tlbody">${x.body}</div><div class="ai">✨ AI要約：${x.ai}</div></div>`).join(''):'<div class="card">履歴がありません</div>'}</div>`;}
+
+/* ---------- RECORD MODAL ---------- */
+function openRecord(){recStep=0;recType='';recTarget='';showSheet(recordForm());}
+function showSheet(html){const o=document.getElementById('ovl');document.getElementById('sheet').innerHTML=html;o.classList.add('show');}
+function closeSheet(){document.getElementById('ovl').classList.remove('show');}
+function recordForm(){
+  return `<h3>訪問を記録 <button class="x" onclick="closeSheet()">×</button></h3>
+   <div class="field"><label>相手を選ぶ</label><input placeholder="🔍 名前・会社名で検索" value="${recTarget}"></div>
+   <div class="field"><div class="seg"><button class="active">仲介業者</button><button>既存顧客</button></div></div>
+   <div class="field"><label>訪問日時</label><input value="2026/06/07 14:30"></div>
+   <div class="field"><label>種別</label><div class="types">
+     ${[['訪問アポ','🗓'],['訪問ついで','📍'],['電話','📞'],['メモ','📝']].map(([t,i])=>`<button class="${recType===t?'active':''}" onclick="recType='${t}';showSheet(recordForm())"><span class="ic">${i}</span>${t}</button>`).join('')}
+   </div></div>
+   <div class="field"><label>内容</label><textarea placeholder="テキストを貼り付け、または下のボタンで録音">${recStep===0?'':'横浜支店の移転後フォロー。新オフィスに満足。決算は3月で予算は4月以降に動く。レイアウト微調整の相談あり。'}</textarea>
+     <button class="rec" onclick="document.querySelector('.sheet textarea').value='横浜支店の移転後フォロー。新オフィスに満足。決算は3月で予算は4月以降に動く。レイアウト微調整の相談あり。'">🎙 録音開始（サンプル文を挿入）</button></div>
+   <button class="cta" style="margin:6px 0 0;width:100%" onclick="aiAnalyze()">記録して保存</button>`;
+}
+function aiAnalyze(){
+  showSheet(`<div class="ai-loading"><div class="spark">✨</div><div>AIが内容を解析中...</div>
+     <div class="bar"><i></i></div>
+     <div class="note">解析中はこの画面を閉じても保存されます</div></div>`);
+  setTimeout(aiProposal,2300);
+}
+function aiProposal(){
+  showSheet(`<h3>✨ AIからの更新提案 <button class="x" onclick="closeSheet()">×</button></h3>
+   <div class="prop" id="p1"><div><div class="pk">次回フォロー予定日</div><div class="pv">→ 2026年9月に設定</div></div>
+     <div class="pbtns"><button class="mini apply" onclick="applyProp('p1')">適用</button><button class="mini" onclick="skipProp('p1')">スキップ</button></div></div>
+   <div class="prop" id="p2"><div><div class="pk">決算月</div><div class="pv">→ 3月 を確認・保持</div></div>
+     <div class="pbtns"><button class="mini apply" onclick="applyProp('p2')">適用</button><button class="mini" onclick="skipProp('p2')">スキップ</button></div></div>
+   <div class="prop" id="p3"><div><div class="pk">メモ</div><div class="pv">「レイアウト微調整の相談あり → 商機の可能性」</div></div>
+     <div class="pbtns"><button class="mini apply" onclick="applyProp('p3')">適用</button><button class="mini" onclick="skipProp('p3')">スキップ</button></div></div>
+   <button class="cta" style="margin:10px 0 6px;width:100%" onclick="saveDone()">すべて適用して保存</button>
+   <button class="btn" style="width:100%" onclick="saveDone()">スキップして保存</button>`);
+}
+function applyProp(id){const e=document.getElementById(id);e.classList.add('applied');e.querySelector('.pbtns').innerHTML='<span class="mini apply">✓ 適用済</span>';}
+function skipProp(id){const e=document.getElementById(id);e.style.opacity='.4';e.querySelector('.pbtns').innerHTML='<span class="mini">— スキップ</span>';}
+function saveDone(){closeSheet();toast('保存しました ✓');}
+function alertMail(){
+  showSheet(`<div class="ai-loading"><div class="spark">✨</div><div>Copilotがメールを生成中...</div><div class="bar"><i></i></div></div>`);
+  setTimeout(()=>showSheet(`<h3>📧 メール下書き <button class="x" onclick="closeSheet()">×</button></h3>
+   <div class="field"><label>件名</label><input value="先日はありがとうございました（次回お打ち合わせのご相談）"></div>
+   <div class="field"><label>本文</label><textarea style="min-height:180px">田中様
+
+いつもお世話になっております。
+先日は貴重なお時間をいただきありがとうございました。
+
+息子さんの少年野球、地区大会準優勝とのこと、誠におめでとうございます。
+週末はさぞ盛り上がったことと存じます。
+
+さて、秋頃に動きがありそうとのお話、ぜひ詳しくお伺いできればと存じます。
+近日中に一度お時間を頂戴できますと幸いです。
+
+何卒よろしくお願いいたします。</textarea></div>
+   <button class="cta" style="width:100%;margin-bottom:8px" onclick="saveDone()">Outlookの下書きに保存</button>
+   <button class="btn" style="width:100%" onclick="alertMail()">↻ 再生成</button>`),1800);
+}
+function toast(msg){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+
+/* ===================== MANAGEMENT DASHBOARD ===================== */
+function dashboard(){
+  const reps=['佐藤','鈴木M'];
+  const repData=reps.map(r=>{
+    const bs=liveBrokers().filter(b=>b.assignee===r), cs=liveCusts().filter(c=>c.assignee===r);
+    const bAlert=bs.filter(b=>brokerAlert(b).lv==='y').length;
+    const cAlert=cs.filter(c=>['y','r'].includes(custAlert(c).lv)).length;
+    const visitsCount={'佐藤':14,'鈴木M':9}[r];
+    const recent={'佐藤':'グリーンテック（5/28 立ち寄り）','鈴木M':'井上 美咲（5/30 訪問）'}[r];
+    return {r,bs:bs.length,cs:cs.length,unfollow:bAlert+cAlert,visits:visitsCount,recent,
+      lv:(bAlert+cAlert)>=8?'r':(bAlert+cAlert)>=4?'y':'g'};
+  }).sort((a,b)=>b.unfollow-a.unfollow);
+
+  const totalVisits=23, totalUnfollow=repData.reduce((s,x)=>s+x.unfollow,0);
+  const yellow=liveCusts().filter(c=>custAlert(c).lv==='y').length+liveBrokers().filter(b=>brokerAlert(b).lv==='y').length;
+  const red=liveCusts().filter(c=>custAlert(c).lv==='r').length;
+  const noAsg=brokers.filter(isUnassigned).length+customers.filter(isUnassigned).length;
+  const unpool=[...brokers.filter(isUnassigned),...customers.filter(isUnassigned)];
+
+  const ranking=brokers.filter(b=>b.refs>0).sort((a,b)=>b.refs-a.refs).slice(0,5);
+
+  return `<div class="dash">
+   <div class="dashhead"><h2>📊 マネジメントダッシュボード　<span style="color:var(--text-sub);font-size:13px;font-weight:500">2026年6月</span></h2>
+     <div class="period"><button class="active">今月</button><button>先月</button><button>四半期</button><button>年間</button></div></div>
+   <div class="kpis" style="grid-template-columns:repeat(5,1fr)">
+     <div class="kpi"><div class="lab">今月の訪問件数</div><div class="num accent">${totalVisits}</div><div class="delta up">▲ 5 先月比</div></div>
+     <div class="kpi"><div class="lab">未フォロー件数</div><div class="num">${totalUnfollow}</div><div class="delta down">▲ 2 先月比</div></div>
+     <div class="kpi"><div class="lab">🟡 黄アラート</div><div class="num warn">${yellow}</div><div class="delta">要フォロー</div></div>
+     <div class="kpi"><div class="lab">🔴 赤アラート</div><div class="num dang">${red}</div><div class="delta down">至急対応</div></div>
+     <div class="kpi" style="border-color:var(--danger)"><div class="lab">⚠️ 担当者なし</div><div class="num dang">${noAsg}</div><div class="delta down">要再割当</div></div>
+   </div>
+   <div class="grid2">
+     <div class="panel"><h3>担当者別状況（未フォロー件数順）</h3>
+       <div class="repcards">${repData.map(x=>`
+        <div class="rep"><div class="rname"><span class="dot ${x.lv}"></span>${x.r}</div>
+          <div class="rrow"><span>今月訪問</span><b>${x.visits}件</b></div>
+          <div class="rrow"><span>仲介 / 顧客</span><b>${x.bs} / ${x.cs}</b></div>
+          <div class="rrow"><span>未フォロー</span><b style="color:${x.lv==='r'?'var(--danger)':x.lv==='y'?'var(--warning)':'var(--text)'}">${x.unfollow}件</b></div>
+          <div class="recent">直近：${x.recent}</div></div>`).join('')}</div>
+     </div>
+     <div class="panel"><h3>仲介業者 紹介ランキング</h3>
+       ${ranking.map((b,i)=>`<div class="rank"><span class="no ${['gold','silver','bronze'][i]||''}">${i+1}</span><span class="rc">${b.name}<br><span style="color:var(--text-sub);font-size:11px">${b.comp}</span></span><span class="rv">${b.refs}件</span></div>`).join('')}
+     </div>
+   </div>
+   <div class="grid2">
+     <div class="panel"><h3>月別訪問件数推移</h3>
+       <div class="bars">${[['1月',31],['2月',28],['3月',35],['4月',24],['5月',18],['6月',23]].map(([m,v])=>`<div class="b"><div class="bar2" style="height:${v/35*100}%"></div><div class="bl">${m}</div></div>`).join('')}</div>
+     </div>
+     <div class="panel"><h3>長期放置トップ</h3>
+       ${liveCusts().map(c=>({c,d:daysSince(c.last)})).filter(x=>!x.c.handling).sort((a,b)=>b.d-a.d).slice(0,3).map(x=>`<div class="rank"><span class="no" style="background:var(--danger);color:#fff">!</span><span class="rc">${x.c.comp}</span><span class="rv" style="color:var(--danger)">${fmtDays(x.d)}</span></div>`).join('')}
+       <div class="note-box">📨 <b>週次報告</b>：毎週<b>火曜13:00</b>（設定リストで変更可）に上記サマリーを管理者へTeams自動送信。水曜8:30の経営会議前に状況を把握できます。</div>
+     </div>
+   </div>
+   <div class="grid2">
+     <div class="panel" style="border-color:var(--danger)"><h3>⚠️ 未割当プール（担当者なし）</h3>
+       ${unpool.length?unpool.map(x=>`<div class="rank"><span class="no" style="background:var(--danger);color:#fff">!</span><span class="rc">${x.name||x.comp}<br><span style="color:var(--text-sub);font-size:11px">${x.name?x.comp:x.industry} / ${x.addr}</span></span><span class="rv" style="color:var(--danger)">要割当</span></div>`).join(''):'<div class="rank"><span class="rc">未割当はありません 🎉</span></div>'}
+       <div class="note-box">退職等で担当が空いた相手。<b>営業が自分で引き取る（手挙げ）</b>か、AI提案で割当。<b>会議なし</b>でさばける設計。失注済みは休眠、クレームは対応NGへ。</div>
+     </div>
+     <div class="panel"><h3>担当者の一括移管</h3>
+       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+         <select style="background:var(--primary);border:1px solid var(--divider);color:var(--text);padding:9px;border-radius:8px"><option>佐藤</option><option>鈴木M</option></select>
+         <span style="color:var(--text-sub)">→</span>
+         <select style="background:var(--primary);border:1px solid var(--divider);color:var(--text);padding:9px;border-radius:8px"><option>鈴木M</option><option>佐藤</option></select>
+         <button class="mini apply" onclick="toast('一括移管しました（デモ）')">一括移管</button>
+       </div>
+       <div class="note-box">退職・異動時に、対象営業の全担当を別の営業へ<b>まとめて付け替え</b>。1件ずつの手作業や重い再割当会議が不要に。</div>
+     </div>
+   </div>
+  </div>`;
+}
+
+render();
+</script>
+</body>
+</html>
