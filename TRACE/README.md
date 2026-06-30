@@ -77,7 +77,8 @@ TRACE/
 ├ 引き継ぎ書-会社PC用.md          ← 背景・確定仕様（設計の正本）
 ├ scripts/
 │  ├ Deploy-TRACE.ps1            ← ★ワンコマンド入口（前提チェック＋展開）
-│  └ Provision-TRACE-Lists.ps1   ← リスト定義・データ取り込みの本体
+│  ├ Provision-TRACE-Lists.ps1   ← リスト定義・データ取り込みの本体
+│  └ App-SourceControl.ps1       ← アプリを pac でコード化(unpack)/再構築(pack)
 ├ demo-data/
 │  ├ TRACE_*.csv                 ← サンプルデータ5種
 │  └ user-map.csv               ← 担当者の「架空→実メール」対応表（任意）
@@ -89,7 +90,9 @@ TRACE/
 ├ proposal/                      ← 役員向け提案（pptx＋構成）
 ├ flows/                         ← Power Automate フロー7本の作成仕様（式入り）
 │  ├ README.md / 01〜07 各フロー
-└ docs/自動化の進め方.md          ← 何がどこまで自動化されるか（やさしい説明）
+└ docs/
+   ├ 自動化の進め方.md           ← 何がどこまで自動化されるか（やさしい説明）
+   └ アプリのコード化-pac.md      ← 画面を git 管理する現実的ワークフロー
 ```
 
 ---
@@ -100,4 +103,5 @@ TRACE/
 - [x] ①データ層：ワンコマンド展開（担当者マッピング・RelatedId 連結・全列取り込みに対応）
 - [x] ③フロー：7本の作成仕様（式入り）を `flows/` に用意
 - [x] ②画面：コピペ手順書 `runbook/画面づくり-コピペ手順.md` を整備
-- [ ] ②画面：コード生成（`pac` ソース化）の検証 ※あなたのPCでの取り込み確認が前提
+- [x] ②画面：コード化ワークフロー（`pac` round-trip）と `App-SourceControl.ps1` を用意
+      ※ ゼロからの一発生成は壊れやすいため非推奨。実体はC手順書で作り、その後コード化する方針
